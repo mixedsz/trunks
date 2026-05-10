@@ -133,6 +133,9 @@ end)
 RegisterNetEvent("sf-trunks:getOffsets")
 AddEventHandler("sf-trunks:getOffsets", function(offsets)
     Offsets = offsets
+    local count = 0
+    for _ in pairs(Offsets) do count = count + 1 end
+    print(("[sf-trunks] Received %d vehicle offsets from server"):format(count))
 end)
 
 RegisterNetEvent("sf-trunks:setNewOffset")
@@ -667,3 +670,31 @@ if Config.DevMode then
         TriggerEvent("sf-trunks:inEditor", false)
     end, false)
 end
+
+RegisterCommand("trunkdebug", function()
+    local count = 0
+    for _ in pairs(Offsets) do count = count + 1 end
+    print(("[sf-trunks] Offsets loaded: %d"):format(count))
+
+    local vehicle = GetClosestVehicle_T(false)
+    if not vehicle then
+        print("[sf-trunks] No vehicle nearby")
+        return
+    end
+
+    local model = GetEntityModel(vehicle)
+    local hasOffset = Offsets[model] ~= nil
+    local lockStatus = GetVehicleDoorLockStatus(vehicle)
+    local isNpc = IsVehicleNpc(vehicle)
+    local netId = NetworkGetNetworkIdFromEntity(vehicle)
+    local netExists = NetworkDoesNetworkIdExist(netId)
+    local trunkState = Entity(vehicle).state.Trunk
+
+    print(("[sf-trunks] Nearest vehicle model hash: %s"):format(model))
+    print(("[sf-trunks]   Has offset entry : %s"):format(tostring(hasOffset)))
+    print(("[sf-trunks]   Lock status      : %d (1=open, 2=locked)"):format(lockStatus))
+    print(("[sf-trunks]   Is NPC vehicle   : %s"):format(tostring(isNpc)))
+    print(("[sf-trunks]   Net ID valid     : %s"):format(tostring(netExists)))
+    print(("[sf-trunks]   InTrunk global   : %s"):format(tostring(InTrunk)))
+    print(("[sf-trunks]   Trunk state bag  : %s"):format(tostring(trunkState)))
+end, false)
