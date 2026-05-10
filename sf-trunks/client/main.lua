@@ -249,14 +249,18 @@ SetStateInTrunk = function(vehicleNetId, inTrunk, vehicle)
         SetPedProofInTrunk(myPed, true)
         SetPedCanRagdoll(myPed, false)
         ClearPedTasksImmediately(myPed)
-        Citizen.Wait(50)
+        Citizen.Wait(200)
         SetupCameraTrunk(vehicle)
+        -- Play animation BEFORE attaching so the ped is already in trunk pose
+        RequestAnimDict2("fin_ext_p1-7")
+        TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, -8.0, -1, 1, 0.0, false, false, false)
+        Citizen.Wait(100)
         AttachEntityToEntity(myPed, vehicle, 0,
             offset.o.x, offset.o.y, offset.o.z,
             offset.r.x, offset.r.y, offset.r.z,
             true, true, false, true, 1, true)
+        Citizen.Wait(100)
         FreezeEntityPosition(myPed, true)
-        PlayTrunkAnim()
     else
         DetachPed()
         if DoesEntityExist(vehicle) then
@@ -440,6 +444,7 @@ AddStateBagChangeHandler("InTrunk", ("player:%s"):format(MyServerId), function(b
                     SetPedCanRagdoll(myPed, false)
                     FreezeEntityPosition(myPed, true)
                     if not IsEntityPlayingAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 3) then
+                        ClearPedTasksImmediately(myPed)
                         PlayTrunkAnim()
                         Citizen.Wait(100)
                     end
