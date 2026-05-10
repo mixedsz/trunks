@@ -48,16 +48,10 @@ AddEventHandler("sf-trunks:exitTrunk", function(vehicle)
 end)
 
 AddEventHandler("sf-trunks:putInClosest", function(targetPed)
-    if GetEntityType(targetPed) == 2 then
-        local myPed = PlayerPedId()
-        local playerServerId, closestPed = GetClosestPlayer()
-        if closestPed then
-            if DoesEntityExist(closestPed) and closestPed ~= myPed then
-                targetPed = closestPed
-            end
-        else
-            return
-        end
+    if GetEntityType(targetPed) ~= 2 then
+        local _, closestPed = GetClosestPlayer()
+        if not closestPed or not DoesEntityExist(closestPed) then return end
+        targetPed = closestPed
     end
 
     local playerIndex = NetworkGetPlayerIndexFromPed(targetPed)
@@ -72,7 +66,7 @@ AddEventHandler("sf-trunks:putInClosest", function(targetPed)
         local isDown = targetState.SFTRUNKS_DEAD or targetState.SFTRUNKS_HANDCUFFED
                        or wasabiDead == "dead" or wasabiDead == "laststand"
         if isDown then
-            local closestVehicle = GetClosestVehicle_T()
+            local closestVehicle = GetClosestVehicle_T(false)
             if closestVehicle ~= nil then
                 if DoesEntityExist(closestVehicle) then
                     if GetVehicleDoorLockStatus(closestVehicle) == 2 then
@@ -254,12 +248,19 @@ SetStateInTrunk = function(vehicleNetId, inTrunk, vehicle)
         end
         SetPedProofInTrunk(myPed, true)
         SetPedCanRagdoll(myPed, false)
+        ClearPedTasksImmediately(myPed)
+        Citizen.Wait(200)
         SetupCameraTrunk(vehicle)
+        -- Play animation BEFORE attaching so the ped is already in trunk pose
+        RequestAnimDict2("fin_ext_p1-7")
+        TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, -8.0, -1, 1, 0.0, false, false, false)
+        Citizen.Wait(100)
         AttachEntityToEntity(myPed, vehicle, 0,
             offset.o.x, offset.o.y, offset.o.z,
             offset.r.x, offset.r.y, offset.r.z,
             true, true, false, true, 1, true)
-        PlayTrunkAnim()
+        Citizen.Wait(100)
+        FreezeEntityPosition(myPed, true)
     else
         DetachPed()
         if DoesEntityExist(vehicle) then
@@ -395,6 +396,7 @@ end
 
 DetachPed = function()
     local myPed = PlayerPedId()
+    FreezeEntityPosition(myPed, false)
     ClearPedTasks(myPed)
     DetachEntity(myPed, false, false)
 end
@@ -419,9 +421,10 @@ end
 
 PlayTrunkAnim = function()
     local myPed = PlayerPedId()
-    ClearPedTasks(myPed)
+    SetPedCanRagdoll(myPed, false)
+    ClearPedTasksImmediately(myPed)
     RequestAnimDict2("fin_ext_p1-7")
-    TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, 8.0, -1, 2, 999.0, false, false, false)
+    TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, 8.0, -1, 1, 999.0, false, false, false)
 end
 
 local inTrunkThread = false
@@ -438,7 +441,10 @@ AddStateBagChangeHandler("InTrunk", ("player:%s"):format(MyServerId), function(b
 
                     ticker = ticker + 1
 
+                    SetPedCanRagdoll(myPed, false)
+                    FreezeEntityPosition(myPed, true)
                     if not IsEntityPlayingAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 3) then
+                        ClearPedTasksImmediately(myPed)
                         PlayTrunkAnim()
                         Citizen.Wait(100)
                     end
