@@ -306,7 +306,10 @@ CanPullPedFromTrunk = function(vehicle)
     local trunk = Entity(vehicle).state.Trunk
     if trunk ~= nil then
         local targetState = Player(trunk).state
-        if not targetState.SFTRUNKS_DEAD and not targetState.SFTRUNKS_HANDCUFFED then
+        local wasabiDead = targetState.dead
+        local isDown = targetState.SFTRUNKS_DEAD or targetState.SFTRUNKS_HANDCUFFED
+                       or wasabiDead == "dead" or wasabiDead == "laststand"
+        if not isDown then
             return false
         end
     end

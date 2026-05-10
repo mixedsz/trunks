@@ -413,9 +413,10 @@ end
 
 PlayTrunkAnim = function()
     local myPed = PlayerPedId()
-    ClearPedTasks(myPed)
+    SetPedCanRagdoll(myPed, false)
+    ClearPedTasksImmediately(myPed)
     RequestAnimDict2("fin_ext_p1-7")
-    TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, 8.0, -1, 2, 999.0, false, false, false)
+    TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, 8.0, -1, 1, 999.0, false, false, false)
 end
 
 local inTrunkThread = false
