@@ -68,7 +68,10 @@ AddEventHandler("sf-trunks:putInClosest", function(targetPed)
     local targetServerId = GetPlayerServerId(playerIndex)
     local targetState = Player(targetServerId).state
     if targetState then
-        if targetState.SFTRUNKS_DEAD or targetState.SFTRUNKS_HANDCUFFED then
+        local wasabiDead = targetState.dead
+        local isDown = targetState.SFTRUNKS_DEAD or targetState.SFTRUNKS_HANDCUFFED
+                       or wasabiDead == "dead" or wasabiDead == "laststand"
+        if isDown then
             local closestVehicle = GetClosestVehicle_T()
             if closestVehicle ~= nil then
                 if DoesEntityExist(closestVehicle) then
