@@ -13,7 +13,8 @@ description  "Script to hide in vehicle's trunk for FiveM"
 ui_page "html/index.html"
 dependencies {
 	"/server:5848",
-    "/onesync"
+    "/onesync",
+    "ox_target",
 }
 files {
     "html/**/*"
