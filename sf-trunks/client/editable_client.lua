@@ -280,17 +280,24 @@ end
 ---@param targetPed number
 ---@return boolean
 CanPutPedInTrunk = function(targetPed)
-    if DoesEntityExist(targetPed) then
-        local state = LocalPlayer.state
-        if not state.SFTRUNKS_DEAD and not state.SFTRUNKS_HANDCUFFED then
-            local targetState = Player(GetPlayerServerId(NetworkGetPlayerIndexFromPed(targetPed))).state
-            if targetState.SFTRUNKS_HANDCUFFED or targetState.SFTRUNKS_DEAD then
-                return GetClosestVehicle_T(false, 3.0) ~= nil
-            end
-        end
+    local targetIndex = NetworkGetPlayerIndexFromPed(targetPed)
+    if targetIndex == -1 then return false end
+
+    local myState = LocalPlayer.state
+    if myState.SFTRUNKS_DEAD or myState.SFTRUNKS_HANDCUFFED then return false end
+
+    local targetServerId = GetPlayerServerId(targetIndex)
+    local targetState = Player(targetServerId).state
+
+    local isDown = targetState.SFTRUNKS_HANDCUFFED or targetState.SFTRUNKS_DEAD
+
+    -- Read wasabi_ambulance state bag directly ("laststand" or "dead")
+    if not isDown then
+        local wasabiDead = targetState.dead
+        isDown = wasabiDead == "dead" or wasabiDead == "laststand"
     end
 
-    return false
+    return isDown and GetClosestVehicle_T(false, 3.0) ~= nil
 end
 
 ---@param vehicle number

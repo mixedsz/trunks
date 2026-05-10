@@ -35,9 +35,10 @@ RegisterNetEvent("sf-trunks:putInClosest", function(targetServerId, vehicleNetId
     if not isNetIdValid(vehicleNetId) then return end
 
     local targetState = Player(targetServerId).state
-    if not targetState.SFTRUNKS_DEAD and not targetState.SFTRUNKS_HANDCUFFED then
-        return
-    end
+    local wasabiDead = targetState.dead -- "laststand" or "dead" from wasabi_ambulance
+    local isDown = targetState.SFTRUNKS_DEAD or targetState.SFTRUNKS_HANDCUFFED
+                   or wasabiDead == "dead" or wasabiDead == "laststand"
+    if not isDown then return end
 
     TriggerClientEvent("sf-trunks:getIn", targetServerId, vehicleNetId)
 end)
