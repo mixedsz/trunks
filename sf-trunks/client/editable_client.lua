@@ -211,14 +211,12 @@ end
 ---@return boolean
 CanEnterVehicleTrunk = function(vehicle)
     if not InTrunk then
-        if Offsets[GetEntityModel(vehicle)] then
-            local netId = NetworkGetNetworkIdFromEntity(vehicle)
-            if NetworkDoesNetworkIdExist(netId) then
-                local state = Entity(vehicle).state
-                if state then
-                    if state.Trunk == nil then
-                        return IsVehicleOpen(vehicle)
-                    end
+        local netId = NetworkGetNetworkIdFromEntity(vehicle)
+        if NetworkDoesNetworkIdExist(netId) then
+            local state = Entity(vehicle).state
+            if state then
+                if state.Trunk == nil then
+                    return IsVehicleOpen(vehicle)
                 end
             end
         end

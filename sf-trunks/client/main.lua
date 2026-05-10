@@ -241,16 +241,21 @@ SetStateInTrunk = function(vehicleNetId, inTrunk, vehicle)
 
     if inTrunk then
         local offset = Offsets[GetEntityModel(vehicle)]
-        if offset then
-            SetPedProofInTrunk(myPed, true)
-            SetPedCanRagdoll(myPed, false)
-            SetupCameraTrunk(vehicle)
-            AttachEntityToEntity(myPed, vehicle, 0,
-                offset.o.x, offset.o.y, offset.o.z,
-                offset.r.x, offset.r.y, offset.r.z,
-                true, true, false, true, 1, true)
-            PlayTrunkAnim()
+        if not offset then
+            local minDims, maxDims = GetModelDimensions(GetEntityModel(vehicle))
+            offset = {
+                o = { x = 0.0, y = minDims.y + 0.3, z = 0.3 },
+                r = { x = 0.0, y = 0.0, z = 180.0 },
+            }
         end
+        SetPedProofInTrunk(myPed, true)
+        SetPedCanRagdoll(myPed, false)
+        SetupCameraTrunk(vehicle)
+        AttachEntityToEntity(myPed, vehicle, 0,
+            offset.o.x, offset.o.y, offset.o.z,
+            offset.r.x, offset.r.y, offset.r.z,
+            true, true, false, true, 1, true)
+        PlayTrunkAnim()
     else
         DetachPed()
         if DoesEntityExist(vehicle) then
