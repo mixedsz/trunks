@@ -1,0 +1,18 @@
+Locales["pl"] = {
+    ["enterVehicle"] = "Wejdź do bagażnika",
+    ["exitVehicle"] = "Wyjdź z bagażnika",
+    ["getIntoTrunk"] = "Wchodzisz do bagaznika",
+    ["getOutOfTrunk"] = "Wysiadanie z bagażnika",
+    ["vehicleIsLocked"] = "Pojazd jest zamknięty",
+    ["vehicleIsTooFast"] = "Pojazd porusza się za szybko",
+    ["putPlayerInTrunk"] = "Wrzuć do bagażnika",
+    ["puttingPlayerIntoTrunk"] = "Wrzucanie do bagażnika",
+    ["pullPlayerFromTrunk"] = "Wyciągnij z bagażnika",
+    ["pullingPlayerOutOfTrunk"] = "Wyciąganie z bagażnika",
+    ["cantPutPlayerIntoThatVehicle"] = "Nie możesz wrzucić gracza do tego pojazdu",
+    ["position"] = "Pozycja",
+    ["rotation"] = "Rotacja",
+    ["confirm"] = "Potwierdź",
+    ["cancel"] = "Anuluj",
+    ["openAllVehicleDoors"] = "Otwórz drzwi",
+}
