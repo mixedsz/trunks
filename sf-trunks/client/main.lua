@@ -68,7 +68,10 @@ AddEventHandler("sf-trunks:putInClosest", function(targetPed)
     local targetServerId = GetPlayerServerId(playerIndex)
     local targetState = Player(targetServerId).state
     if targetState then
-        if targetState.SFTRUNKS_DEAD or targetState.SFTRUNKS_HANDCUFFED then
+        local wasabiDead = targetState.dead
+        local isDown = targetState.SFTRUNKS_DEAD or targetState.SFTRUNKS_HANDCUFFED
+                       or wasabiDead == "dead" or wasabiDead == "laststand"
+        if isDown then
             local closestVehicle = GetClosestVehicle_T()
             if closestVehicle ~= nil then
                 if DoesEntityExist(closestVehicle) then
@@ -133,6 +136,9 @@ end)
 RegisterNetEvent("sf-trunks:getOffsets")
 AddEventHandler("sf-trunks:getOffsets", function(offsets)
     Offsets = offsets
+    local count = 0
+    for _ in pairs(Offsets) do count = count + 1 end
+    print(("[sf-trunks] Received %d vehicle offsets from server"):format(count))
 end)
 
 RegisterNetEvent("sf-trunks:setNewOffset")
@@ -238,16 +244,22 @@ SetStateInTrunk = function(vehicleNetId, inTrunk, vehicle)
 
     if inTrunk then
         local offset = Offsets[GetEntityModel(vehicle)]
-        if offset then
-            SetPedProofInTrunk(myPed, true)
-            SetPedCanRagdoll(myPed, false)
-            SetupCameraTrunk(vehicle)
-            AttachEntityToEntity(myPed, vehicle, 0,
-                offset.o.x, offset.o.y, offset.o.z,
-                offset.r.x, offset.r.y, offset.r.z,
-                true, true, false, true, 1, true)
-            PlayTrunkAnim()
+        if not offset then
+            local minDims, maxDims = GetModelDimensions(GetEntityModel(vehicle))
+            -- 0.72 toward rear keeps the ped past the seat back and inside the trunk
+            offset = {
+                o = { x = 0.0, y = minDims.y * 0.68, z = 0.15 },
+                r = { x = 0.0, y = 0.0, z = 180.0 },
+            }
         end
+        SetPedProofInTrunk(myPed, true)
+        SetPedCanRagdoll(myPed, false)
+        SetupCameraTrunk(vehicle)
+        AttachEntityToEntity(myPed, vehicle, 0,
+            offset.o.x, offset.o.y, offset.o.z,
+            offset.r.x, offset.r.y, offset.r.z,
+            true, true, false, true, 1, true)
+        PlayTrunkAnim()
     else
         DetachPed()
         if DoesEntityExist(vehicle) then
@@ -667,3 +679,31 @@ if Config.DevMode then
         TriggerEvent("sf-trunks:inEditor", false)
     end, false)
 end
+
+RegisterCommand("trunkdebug", function()
+    local count = 0
+    for _ in pairs(Offsets) do count = count + 1 end
+    print(("[sf-trunks] Offsets loaded: %d"):format(count))
+
+    local vehicle = GetClosestVehicle_T(false)
+    if not vehicle then
+        print("[sf-trunks] No vehicle nearby")
+        return
+    end
+
+    local model = GetEntityModel(vehicle)
+    local hasOffset = Offsets[model] ~= nil
+    local lockStatus = GetVehicleDoorLockStatus(vehicle)
+    local isNpc = IsVehicleNpc(vehicle)
+    local netId = NetworkGetNetworkIdFromEntity(vehicle)
+    local netExists = NetworkDoesNetworkIdExist(netId)
+    local trunkState = Entity(vehicle).state.Trunk
+
+    print(("[sf-trunks] Nearest vehicle model hash: %s"):format(model))
+    print(("[sf-trunks]   Has offset entry : %s"):format(tostring(hasOffset)))
+    print(("[sf-trunks]   Lock status      : %d (1=open, 2=locked)"):format(lockStatus))
+    print(("[sf-trunks]   Is NPC vehicle   : %s"):format(tostring(isNpc)))
+    print(("[sf-trunks]   Net ID valid     : %s"):format(tostring(netExists)))
+    print(("[sf-trunks]   InTrunk global   : %s"):format(tostring(InTrunk)))
+    print(("[sf-trunks]   Trunk state bag  : %s"):format(tostring(trunkState)))
+end, false)

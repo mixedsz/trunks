@@ -1,8 +1,3 @@
-shared_script "@ReaperV4/imports/bypass.lua"
-shared_script "@ReaperV4/imports/bypass_s.lua"
-shared_script "@ReaperV4/imports/bypass_c.lua"
-lua54 "yes" -- needed for Reaper
-
 fx_version   "cerulean"
 lua54        "yes"
 game         "gta5"
@@ -13,12 +8,15 @@ description  "Script to hide in vehicle's trunk for FiveM"
 ui_page "html/index.html"
 dependencies {
 	"/server:5848",
-    "/onesync"
+    "/onesync",
+    "ox_target",
+    "ox_lib",
 }
 files {
     "html/**/*"
 }
 shared_scripts {
+    "@ox_lib/init.lua",
     "config.lua",
     "modules/shared_*.lua",
     "locales/*.lua",

@@ -8,7 +8,34 @@ local isDragged = false
 ---@param action function
 ---@param canInteract function
 RegisterVehicleInteraction = function(name, icon, label, action, canInteract)
-    if GetResourceState("ox_target") ~= "missing" or GetResourceState("qtarget") ~= "missing" then
+    local oxtState   = GetResourceState("ox_target")
+    local qtState    = GetResourceState("qtarget")
+    local qbState    = GetResourceState("qb-target")
+    print(("[sf-trunks] RegisterVehicleInteraction(%s) | ox_target=%s qtarget=%s qb-target=%s"):format(name, oxtState, qtState, qbState))
+
+    if oxtState ~= "missing" then
+        local ok, err = pcall(function()
+            exports.ox_target:addGlobalVehicle({
+                {
+                    name = res .. name,
+                    icon = icon,
+                    label = label,
+                    onSelect = function(data)
+                        action(data.entity)
+                    end,
+                    canInteract = function(entity)
+                        return NetworkGetEntityIsNetworked(entity) and canInteract(entity)
+                    end,
+                    distance = 2.0,
+                }
+            })
+        end)
+        if not ok then
+            print(("[sf-trunks] ox_target addGlobalVehicle ERROR: %s"):format(err))
+        else
+            print(("[sf-trunks] ox_target addGlobalVehicle OK: %s"):format(name))
+        end
+    elseif GetResourceState("qtarget") ~= "missing" then
         exports["qtarget"]:Vehicle({
             options = {
                 {
@@ -67,7 +94,29 @@ end
 ---@param action function
 ---@param canInteract function
 RegisterPedInteraction = function(name, icon, label, action, canInteract)
-    if GetResourceState("ox_target") ~= "missing" or GetResourceState("qtarget") ~= "missing" then
+    if GetResourceState("ox_target") ~= "missing" then
+        local ok, err = pcall(function()
+            exports.ox_target:addGlobalPlayer({
+                {
+                    name = res .. name,
+                    icon = icon,
+                    label = label,
+                    onSelect = function(data)
+                        action(data.entity)
+                    end,
+                    canInteract = function(entity)
+                        return canInteract(entity)
+                    end,
+                    distance = 2.0,
+                }
+            })
+        end)
+        if not ok then
+            print(("[sf-trunks] ox_target addGlobalPlayer ERROR: %s"):format(err))
+        else
+            print(("[sf-trunks] ox_target addGlobalPlayer OK: %s"):format(name))
+        end
+    elseif GetResourceState("qtarget") ~= "missing" then
         exports["qtarget"]:Player({
             options = {
                 {
@@ -125,7 +174,15 @@ end
 ---@param canCancel boolean
 ---@return boolean
 ProgressBar = function(label, duration, canCancel)
-   -- return lib.progressBar({ duration = duration, label = label, canCancel = canCancel })
+    if GetResourceState("ox_lib") ~= "missing" and lib and lib.progressBar then
+        return lib.progressBar({
+            duration = duration,
+            label = label,
+            useWhileDead = false,
+            canCancel = canCancel,
+            disable = { move = true, car = true, combat = true },
+        })
+    end
     return true
 end
 
@@ -162,14 +219,12 @@ end
 ---@return boolean
 CanEnterVehicleTrunk = function(vehicle)
     if not InTrunk then
-        if Offsets[GetEntityModel(vehicle)] then
-            local netId = NetworkGetNetworkIdFromEntity(vehicle)
-            if NetworkDoesNetworkIdExist(netId) then
-                local state = Entity(vehicle).state
-                if state then
-                    if state.Trunk == nil then
-                        return IsVehicleOpen(vehicle)
-                    end
+        local netId = NetworkGetNetworkIdFromEntity(vehicle)
+        if NetworkDoesNetworkIdExist(netId) then
+            local state = Entity(vehicle).state
+            if state then
+                if state.Trunk == nil then
+                    return IsVehicleOpen(vehicle)
                 end
             end
         end
@@ -225,17 +280,24 @@ end
 ---@param targetPed number
 ---@return boolean
 CanPutPedInTrunk = function(targetPed)
-    if DoesEntityExist(targetPed) then
-        local state = LocalPlayer.state
-        if not state.SFTRUNKS_DEAD and not state.SFTRUNKS_HANDCUFFED then
-            local targetState = Player(GetPlayerServerId(NetworkGetPlayerIndexFromPed(targetPed))).state
-            if targetState.SFTRUNKS_HANDCUFFED or targetState.SFTRUNKS_DEAD then
-                return GetClosestVehicle_T(true, 3.0) ~= nil
-            end
-        end
+    local targetIndex = NetworkGetPlayerIndexFromPed(targetPed)
+    if targetIndex == -1 then return false end
+
+    local myState = LocalPlayer.state
+    if myState.SFTRUNKS_DEAD or myState.SFTRUNKS_HANDCUFFED then return false end
+
+    local targetServerId = GetPlayerServerId(targetIndex)
+    local targetState = Player(targetServerId).state
+
+    local isDown = targetState.SFTRUNKS_HANDCUFFED or targetState.SFTRUNKS_DEAD
+
+    -- Read wasabi_ambulance state bag directly ("laststand" or "dead")
+    if not isDown then
+        local wasabiDead = targetState.dead
+        isDown = wasabiDead == "dead" or wasabiDead == "laststand"
     end
 
-    return false
+    return isDown and GetClosestVehicle_T(false, 3.0) ~= nil
 end
 
 ---@param vehicle number
@@ -321,3 +383,25 @@ if GetResourceState("qb-core") ~= "missing" then
         LocalPlayer.state:set("SFTRUNKS_DRAGGED", isDragged, true)
     end)
 end
+
+-- wasabi_ambulance death detection
+if GetResourceState("wasabi_ambulance") ~= "missing" then
+    AddEventHandler("wasabi_ambulance:client:SetDeathStatus", function(isDead)
+        LocalPlayer.state:set("SFTRUNKS_DEAD", isDead, true)
+    end)
+end
+
+-- General death monitor: catches any framework (including wasabi_ambulance downed state)
+-- Runs every 500ms; sets SFTRUNKS_DEAD when the ped is dead or fatally injured
+Citizen.CreateThread(function()
+    local wasDown = false
+    while true do
+        local ped = PlayerPedId()
+        local isDown = IsEntityDead(ped) or IsPedFatallyInjured(ped)
+        if isDown ~= wasDown then
+            wasDown = isDown
+            LocalPlayer.state:set("SFTRUNKS_DEAD", isDown, true)
+        end
+        Citizen.Wait(500)
+    end
+end)
