@@ -48,16 +48,10 @@ AddEventHandler("sf-trunks:exitTrunk", function(vehicle)
 end)
 
 AddEventHandler("sf-trunks:putInClosest", function(targetPed)
-    if GetEntityType(targetPed) == 2 then
-        local myPed = PlayerPedId()
-        local playerServerId, closestPed = GetClosestPlayer()
-        if closestPed then
-            if DoesEntityExist(closestPed) and closestPed ~= myPed then
-                targetPed = closestPed
-            end
-        else
-            return
-        end
+    if GetEntityType(targetPed) ~= 2 then
+        local _, closestPed = GetClosestPlayer()
+        if not closestPed or not DoesEntityExist(closestPed) then return end
+        targetPed = closestPed
     end
 
     local playerIndex = NetworkGetPlayerIndexFromPed(targetPed)
@@ -72,7 +66,7 @@ AddEventHandler("sf-trunks:putInClosest", function(targetPed)
         local isDown = targetState.SFTRUNKS_DEAD or targetState.SFTRUNKS_HANDCUFFED
                        or wasabiDead == "dead" or wasabiDead == "laststand"
         if isDown then
-            local closestVehicle = GetClosestVehicle_T()
+            local closestVehicle = GetClosestVehicle_T(false)
             if closestVehicle ~= nil then
                 if DoesEntityExist(closestVehicle) then
                     if GetVehicleDoorLockStatus(closestVehicle) == 2 then
