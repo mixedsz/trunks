@@ -255,6 +255,7 @@ SetStateInTrunk = function(vehicleNetId, inTrunk, vehicle)
             offset.o.x, offset.o.y, offset.o.z,
             offset.r.x, offset.r.y, offset.r.z,
             true, true, false, true, 1, true)
+        FreezeEntityPosition(myPed, true)
         PlayTrunkAnim()
     else
         DetachPed()
@@ -391,6 +392,7 @@ end
 
 DetachPed = function()
     local myPed = PlayerPedId()
+    FreezeEntityPosition(myPed, false)
     ClearPedTasks(myPed)
     DetachEntity(myPed, false, false)
 end
@@ -436,6 +438,7 @@ AddStateBagChangeHandler("InTrunk", ("player:%s"):format(MyServerId), function(b
                     ticker = ticker + 1
 
                     SetPedCanRagdoll(myPed, false)
+                    FreezeEntityPosition(myPed, true)
                     if not IsEntityPlayingAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 3) then
                         PlayTrunkAnim()
                         Citizen.Wait(100)
