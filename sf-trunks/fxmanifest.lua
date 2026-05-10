@@ -10,11 +10,13 @@ dependencies {
 	"/server:5848",
     "/onesync",
     "ox_target",
+    "ox_lib",
 }
 files {
     "html/**/*"
 }
 shared_scripts {
+    "@ox_lib/init.lua",
     "config.lua",
     "modules/shared_*.lua",
     "locales/*.lua",
