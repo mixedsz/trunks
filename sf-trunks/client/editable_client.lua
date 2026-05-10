@@ -8,21 +8,33 @@ local isDragged = false
 ---@param action function
 ---@param canInteract function
 RegisterVehicleInteraction = function(name, icon, label, action, canInteract)
-    if GetResourceState("ox_target") ~= "missing" then
-        exports.ox_target:addGlobalVehicle({
-            {
-                name = res .. name,
-                icon = icon,
-                label = label,
-                onSelect = function(data)
-                    action(data.entity)
-                end,
-                canInteract = function(entity)
-                    return NetworkGetEntityIsNetworked(entity) and canInteract(entity)
-                end,
-                distance = 2.0,
-            }
-        })
+    local oxtState   = GetResourceState("ox_target")
+    local qtState    = GetResourceState("qtarget")
+    local qbState    = GetResourceState("qb-target")
+    print(("[sf-trunks] RegisterVehicleInteraction(%s) | ox_target=%s qtarget=%s qb-target=%s"):format(name, oxtState, qtState, qbState))
+
+    if oxtState ~= "missing" then
+        local ok, err = pcall(function()
+            exports.ox_target:addGlobalVehicle({
+                {
+                    name = res .. name,
+                    icon = icon,
+                    label = label,
+                    onSelect = function(data)
+                        action(data.entity)
+                    end,
+                    canInteract = function(entity)
+                        return NetworkGetEntityIsNetworked(entity) and canInteract(entity)
+                    end,
+                    distance = 2.0,
+                }
+            })
+        end)
+        if not ok then
+            print(("[sf-trunks] ox_target addGlobalVehicle ERROR: %s"):format(err))
+        else
+            print(("[sf-trunks] ox_target addGlobalVehicle OK: %s"):format(name))
+        end
     elseif GetResourceState("qtarget") ~= "missing" then
         exports["qtarget"]:Vehicle({
             options = {
@@ -83,20 +95,27 @@ end
 ---@param canInteract function
 RegisterPedInteraction = function(name, icon, label, action, canInteract)
     if GetResourceState("ox_target") ~= "missing" then
-        exports.ox_target:addGlobalPlayer({
-            {
-                name = res .. name,
-                icon = icon,
-                label = label,
-                onSelect = function(data)
-                    action(data.entity)
-                end,
-                canInteract = function(entity)
-                    return canInteract(entity)
-                end,
-                distance = 2.0,
-            }
-        })
+        local ok, err = pcall(function()
+            exports.ox_target:addGlobalPlayer({
+                {
+                    name = res .. name,
+                    icon = icon,
+                    label = label,
+                    onSelect = function(data)
+                        action(data.entity)
+                    end,
+                    canInteract = function(entity)
+                        return canInteract(entity)
+                    end,
+                    distance = 2.0,
+                }
+            })
+        end)
+        if not ok then
+            print(("[sf-trunks] ox_target addGlobalPlayer ERROR: %s"):format(err))
+        else
+            print(("[sf-trunks] ox_target addGlobalPlayer OK: %s"):format(name))
+        end
     elseif GetResourceState("qtarget") ~= "missing" then
         exports["qtarget"]:Player({
             options = {
