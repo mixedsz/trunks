@@ -243,8 +243,9 @@ SetStateInTrunk = function(vehicleNetId, inTrunk, vehicle)
         local offset = Offsets[GetEntityModel(vehicle)]
         if not offset then
             local minDims, maxDims = GetModelDimensions(GetEntityModel(vehicle))
+            -- ~55% toward rear keeps the ped inside the trunk for most vehicle sizes
             offset = {
-                o = { x = 0.0, y = minDims.y + 0.3, z = 0.3 },
+                o = { x = 0.0, y = minDims.y * 0.55, z = 0.2 },
                 r = { x = 0.0, y = 0.0, z = 180.0 },
             }
         end

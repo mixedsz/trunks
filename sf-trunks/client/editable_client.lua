@@ -174,7 +174,15 @@ end
 ---@param canCancel boolean
 ---@return boolean
 ProgressBar = function(label, duration, canCancel)
-   -- return lib.progressBar({ duration = duration, label = label, canCancel = canCancel })
+    if GetResourceState("ox_lib") ~= "missing" then
+        return lib.progressBar({
+            duration = duration,
+            label = label,
+            useWhileDead = false,
+            canCancel = canCancel,
+            disable = { move = true, car = true, combat = true },
+        })
+    end
     return true
 end
 
