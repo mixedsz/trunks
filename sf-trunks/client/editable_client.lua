@@ -285,7 +285,7 @@ CanPutPedInTrunk = function(targetPed)
         if not state.SFTRUNKS_DEAD and not state.SFTRUNKS_HANDCUFFED then
             local targetState = Player(GetPlayerServerId(NetworkGetPlayerIndexFromPed(targetPed))).state
             if targetState.SFTRUNKS_HANDCUFFED or targetState.SFTRUNKS_DEAD then
-                return GetClosestVehicle_T(true, 3.0) ~= nil
+                return GetClosestVehicle_T(false, 3.0) ~= nil
             end
         end
     end
@@ -375,4 +375,27 @@ if GetResourceState("qb-core") ~= "missing" then
         isDragged = dragged
         LocalPlayer.state:set("SFTRUNKS_DRAGGED", isDragged, true)
     end)
+end
+
+-- wasabi_ambulance death detection
+if GetResourceState("wasabi_ambulance") ~= "missing" then
+    AddEventHandler("wasabi_ambulance:client:SetDeathStatus", function(isDead)
+        LocalPlayer.state:set("SFTRUNKS_DEAD", isDead, true)
+    end)
+end
+
+-- General death monitor: catches any framework (including wasabi_ambulance downed state)
+-- Runs every 500ms; sets SFTRUNKS_DEAD when the ped is dead or fatally injured
+Citizen.CreateThread(function()
+    local wasDown = false
+    while true do
+        local ped = PlayerPedId()
+        local isDown = IsEntityDead(ped) or IsPedFatallyInjured(ped)
+        if isDown ~= wasDown then
+            wasDown = isDown
+            LocalPlayer.state:set("SFTRUNKS_DEAD", isDown, true)
+        end
+        Citizen.Wait(500)
+    end
+end)
 end
