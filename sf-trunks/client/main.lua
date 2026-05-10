@@ -248,6 +248,8 @@ SetStateInTrunk = function(vehicleNetId, inTrunk, vehicle)
         end
         SetPedProofInTrunk(myPed, true)
         SetPedCanRagdoll(myPed, false)
+        ClearPedTasksImmediately(myPed)
+        Citizen.Wait(50)
         SetupCameraTrunk(vehicle)
         AttachEntityToEntity(myPed, vehicle, 0,
             offset.o.x, offset.o.y, offset.o.z,
@@ -433,6 +435,7 @@ AddStateBagChangeHandler("InTrunk", ("player:%s"):format(MyServerId), function(b
 
                     ticker = ticker + 1
 
+                    SetPedCanRagdoll(myPed, false)
                     if not IsEntityPlayingAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 3) then
                         PlayTrunkAnim()
                         Citizen.Wait(100)
