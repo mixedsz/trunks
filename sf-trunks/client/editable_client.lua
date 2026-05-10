@@ -398,4 +398,3 @@ Citizen.CreateThread(function()
         Citizen.Wait(500)
     end
 end)
-end
