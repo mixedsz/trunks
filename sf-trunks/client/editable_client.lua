@@ -8,7 +8,22 @@ local isDragged = false
 ---@param action function
 ---@param canInteract function
 RegisterVehicleInteraction = function(name, icon, label, action, canInteract)
-    if GetResourceState("ox_target") ~= "missing" or GetResourceState("qtarget") ~= "missing" then
+    if GetResourceState("ox_target") ~= "missing" then
+        exports.ox_target:addGlobalVehicle({
+            {
+                name = res .. name,
+                icon = icon,
+                label = label,
+                onSelect = function(data)
+                    action(data.entity)
+                end,
+                canInteract = function(entity)
+                    return NetworkGetEntityIsNetworked(entity) and canInteract(entity)
+                end,
+                distance = 2.0,
+            }
+        })
+    elseif GetResourceState("qtarget") ~= "missing" then
         exports["qtarget"]:Vehicle({
             options = {
                 {
@@ -67,7 +82,22 @@ end
 ---@param action function
 ---@param canInteract function
 RegisterPedInteraction = function(name, icon, label, action, canInteract)
-    if GetResourceState("ox_target") ~= "missing" or GetResourceState("qtarget") ~= "missing" then
+    if GetResourceState("ox_target") ~= "missing" then
+        exports.ox_target:addGlobalPlayer({
+            {
+                name = res .. name,
+                icon = icon,
+                label = label,
+                onSelect = function(data)
+                    action(data.entity)
+                end,
+                canInteract = function(entity)
+                    return canInteract(entity)
+                end,
+                distance = 2.0,
+            }
+        })
+    elseif GetResourceState("qtarget") ~= "missing" then
         exports["qtarget"]:Player({
             options = {
                 {
