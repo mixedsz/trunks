@@ -442,17 +442,13 @@ if GetResourceState("wasabi_ambulance") ~= "missing" then
     end)
 end
 
--- Make the occupant invisible while in the trunk to hide wasabi's death animation
--- glitching. The server fires this on the occupant's client when they are put in
--- (invisible) and again when the pull-out progress bar completes (visible).
--- This runs on the OCCUPANT's machine so SetEntityVisible affects their own ped.
+-- Restore the occupant's visibility when they are pulled out of a trunk.
+-- We no longer hide occupants on put-in; the trunk animation + SetEntityInvincible
+-- keeps them in position without needing to hide them.
 RegisterNetEvent("flake_trunks:setOccupantVisibility")
 AddEventHandler("flake_trunks:setOccupantVisibility", function(visible)
-    local ped = PlayerPedId()
-    SetEntityVisible(ped, visible, false)
-    -- If becoming visible again, also ensure they are no longer frozen
-    -- so wasabi can resume normal control of the ped after being pulled out.
     if visible then
+        local ped = PlayerPedId()
         SetEntityVisible(ped, true, false)
     end
 end)

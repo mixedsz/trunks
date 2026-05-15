@@ -46,10 +46,6 @@ RegisterNetEvent("flake_trunks:putInClosest", function(targetServerId, vehicleNe
     -- Stop wasabi's knockout loop on the occupant's client so it stops calling
     -- ClearPedTasks which was killing the trunk animation every ~300ms.
     TriggerClientEvent("flake_trunks:suppressWasabi", targetServerId, true)
-
-    -- Make the occupant invisible on their own client to fully hide any residual
-    -- wasabi death animation that fights the trunk attachment.
-    TriggerClientEvent("flake_trunks:setOccupantVisibility", targetServerId, false)
 end)
 
 -- Pull the player currently occupying a vehicle's trunk out of it

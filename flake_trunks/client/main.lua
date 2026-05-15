@@ -240,20 +240,19 @@ SetStateInTrunk = function(vehicleNetId, inTrunk, vehicle)
         local offset = Offsets[GetEntityModel(vehicle)]
         if not offset then
             local minDims, maxDims = GetModelDimensions(GetEntityModel(vehicle))
-            -- 0.72 toward rear keeps the ped past the seat back and inside the trunk
             offset = {
-                o = { x = 0.0, y = minDims.y * 0.68, z = 0.15 },
-                r = { x = 0.0, y = 0.0, z = 180.0 },
+                o = { x = 0.0, y = minDims.y + 0.5, z = 0.25 },
+                r = { x = 0.0, y = 0.0, z = 0.0 },
             }
         end
         SetPedProofInTrunk(myPed, true)
         SetPedCanRagdoll(myPed, false)
         ClearPedTasksImmediately(myPed)
-        Citizen.Wait(200)
+        Citizen.Wait(150)
         SetupCameraTrunk(vehicle)
-        -- Play animation BEFORE attaching so the ped is already in trunk pose
         RequestAnimDict2("fin_ext_p1-7")
-        TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, -8.0, -1, 1, 0.0, false, false, false)
+        -- playbackRate 8.0 fast-forwards to the lying pose immediately
+        TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, -8.0, -1, 1, 8.0, false, false, false)
         Citizen.Wait(100)
         AttachEntityToEntity(myPed, vehicle, 0,
             offset.o.x, offset.o.y, offset.o.z,
@@ -261,8 +260,11 @@ SetStateInTrunk = function(vehicleNetId, inTrunk, vehicle)
             true, true, false, true, 1, true)
         Citizen.Wait(100)
         FreezeEntityPosition(myPed, true)
+        -- Prevent death/ragdoll physics from fighting the trunk animation
+        SetEntityInvincible(myPed, true)
     else
         DetachPed()
+        SetEntityInvincible(myPed, false)
         if DoesEntityExist(vehicle) then
             SetPedProofInTrunk(myPed, false)
             SetPedCanRagdoll(myPed, true)
@@ -422,9 +424,10 @@ end
 PlayTrunkAnim = function()
     local myPed = PlayerPedId()
     SetPedCanRagdoll(myPed, false)
+    SetEntityInvincible(myPed, true)
     ClearPedTasksImmediately(myPed)
     RequestAnimDict2("fin_ext_p1-7")
-    TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, 8.0, -1, 1, 999.0, false, false, false)
+    TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, -8.0, -1, 1, 8.0, false, false, false)
 end
 
 local inTrunkThread = false
@@ -442,11 +445,11 @@ AddStateBagChangeHandler("InTrunk", ("player:%s"):format(MyServerId), function(b
                     ticker = ticker + 1
 
                     SetPedCanRagdoll(myPed, false)
+                    SetEntityInvincible(myPed, true)
                     FreezeEntityPosition(myPed, true)
                     if not IsEntityPlayingAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 3) then
-                        ClearPedTasksImmediately(myPed)
                         PlayTrunkAnim()
-                        Citizen.Wait(100)
+                        Citizen.Wait(50)
                     end
 
                     DisableAllControlActions2()
