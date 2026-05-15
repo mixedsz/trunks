@@ -241,8 +241,8 @@ SetStateInTrunk = function(vehicleNetId, inTrunk, vehicle)
         if not offset then
             local minDims, maxDims = GetModelDimensions(GetEntityModel(vehicle))
             offset = {
-                o = { x = 0.0, y = minDims.y * 0.70, z = 0.25 },
-                r = { x = 0.0, y = 0.0, z = 180.0 },
+                o = { x = 0.0, y = minDims.y * 0.80, z = 0.25 },
+                r = { x = 0.0, y = 0.0, z = 0.0 },
             }
         end
         SetPedProofInTrunk(myPed, true)
