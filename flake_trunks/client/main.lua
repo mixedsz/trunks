@@ -247,18 +247,13 @@ SetStateInTrunk = function(vehicleNetId, inTrunk, vehicle)
         end
         SetPedProofInTrunk(myPed, true)
         SetPedCanRagdoll(myPed, false)
-        ClearPedTasksImmediately(myPed)
-        Citizen.Wait(100)
         SetupCameraTrunk(vehicle)
-        -- Attach to vehicle BEFORE playing animation so the attachment wins.
-        -- lockX/Y/Z = true prevents root motion from dragging the ped to the ground.
         AttachEntityToEntity(myPed, vehicle, 0,
             offset.o.x, offset.o.y, offset.o.z,
             offset.r.x, offset.r.y, offset.r.z,
             true, true, false, true, 1, true)
         FreezeEntityPosition(myPed, true)
-        RequestAnimDict2("amb@world_human_sunbathe@female@back@base")
-        TaskPlayAnim(myPed, "amb@world_human_sunbathe@female@back@base", "base", 8.0, -8.0, -1, 1, 0.0, true, true, true)
+        PlayTrunkAnim()
         SetEntityInvincible(myPed, true)
     else
         DetachPed()
@@ -423,9 +418,10 @@ PlayTrunkAnim = function()
     local myPed = PlayerPedId()
     SetPedCanRagdoll(myPed, false)
     SetEntityInvincible(myPed, true)
-    ClearPedTasksImmediately(myPed)
-    RequestAnimDict2("amb@world_human_sunbathe@female@back@base")
-    TaskPlayAnim(myPed, "amb@world_human_sunbathe@female@back@base", "base", 8.0, -8.0, -1, 1, 0.0, true, true, true)
+    ClearPedTasks(myPed)
+    RequestAnimDict2("fin_ext_p1-7")
+    -- flag 2 = hold on last frame; 999.0 speed snaps to the lying-flat end frame instantly
+    TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, 8.0, -1, 2, 999.0, false, false, false)
 end
 
 local inTrunkThread = false
@@ -445,7 +441,7 @@ AddStateBagChangeHandler("InTrunk", ("player:%s"):format(MyServerId), function(b
                     SetPedCanRagdoll(myPed, false)
                     SetEntityInvincible(myPed, true)
                     FreezeEntityPosition(myPed, true)
-                    if not IsEntityPlayingAnim(myPed, "amb@world_human_sunbathe@female@back@base", "base", 3) then
+                    if not IsEntityPlayingAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 3) then
                         PlayTrunkAnim()
                         Citizen.Wait(50)
                     end
@@ -533,8 +529,8 @@ if Config.DevMode then
         })
 
         SetupCameraTrunk(myPed, vehicle)
-        RequestAnimDict2("amb@world_human_sunbathe@female@back@base")
-        TaskPlayAnim(myPed, "amb@world_human_sunbathe@female@back@base", "base", 8.0, -8.0, -1, 1, 0.0, true, true, true)
+        RequestAnimDict2("fin_ext_p1-7")
+        TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, 8.0, -1, 2, 999.0, false, false, false)
 
         local minDims, maxDims = GetModelDimensions(GetEntityModel(vehicle))
 
@@ -648,7 +644,7 @@ if Config.DevMode then
 
             if changed then
                 AttachEntityToEntity(myPed, vehicle, 0, ox, oy, oz, rx, ry, rz, true, true, false, true, 1, true)
-                TaskPlayAnim(myPed, "amb@world_human_sunbathe@female@back@base", "base", 8.0, -8.0, -1, 1, 0.0, true, true, true)
+                TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, 8.0, -1, 2, 999.0, false, false, false)
             end
 
             Citizen.Wait(0)
@@ -739,7 +735,7 @@ RegisterCommand("trunkwatchdog", function()
         while running do
             local ped = PlayerPedId()
 
-            local anim     = IsEntityPlayingAnim(ped, "amb@world_human_sunbathe@female@back@base", "base", 3)
+            local anim     = IsEntityPlayingAnim(ped, "fin_ext_p1-7", "cs_devin_dual-7", 3)
             local attached = IsEntityAttached(ped)
             local frozen   = IsEntityPositionFrozen(ped)
             local dead     = IsEntityDead(ped)
@@ -833,7 +829,7 @@ RegisterCommand("trunkoccupantwatchdog", function()
             end
 
             if occupantPed and DoesEntityExist(occupantPed) then
-                local anim     = IsEntityPlayingAnim(occupantPed, "amb@world_human_sunbathe@female@back@base", "base", 3)
+                local anim     = IsEntityPlayingAnim(occupantPed, "fin_ext_p1-7", "cs_devin_dual-7", 3)
                 local attached = IsEntityAttached(occupantPed)
                 local frozen   = IsEntityPositionFrozen(occupantPed)
                 local dead     = IsEntityDead(occupantPed)
