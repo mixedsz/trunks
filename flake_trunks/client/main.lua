@@ -248,18 +248,17 @@ SetStateInTrunk = function(vehicleNetId, inTrunk, vehicle)
         SetPedProofInTrunk(myPed, true)
         SetPedCanRagdoll(myPed, false)
         ClearPedTasksImmediately(myPed)
-        Citizen.Wait(150)
-        SetupCameraTrunk(vehicle)
-        RequestAnimDict2("amb@world_human_sunbathe@female@back@base")
-        TaskPlayAnim(myPed, "amb@world_human_sunbathe@female@back@base", "base", 8.0, -8.0, -1, 1, 0.0, false, false, false)
         Citizen.Wait(100)
+        SetupCameraTrunk(vehicle)
+        -- Attach to vehicle BEFORE playing animation so the attachment wins.
+        -- lockX/Y/Z = true prevents root motion from dragging the ped to the ground.
         AttachEntityToEntity(myPed, vehicle, 0,
             offset.o.x, offset.o.y, offset.o.z,
             offset.r.x, offset.r.y, offset.r.z,
             true, true, false, true, 1, true)
-        Citizen.Wait(100)
         FreezeEntityPosition(myPed, true)
-        -- Prevent death/ragdoll physics from fighting the trunk animation
+        RequestAnimDict2("amb@world_human_sunbathe@female@back@base")
+        TaskPlayAnim(myPed, "amb@world_human_sunbathe@female@back@base", "base", 8.0, -8.0, -1, 1, 0.0, true, true, true)
         SetEntityInvincible(myPed, true)
     else
         DetachPed()
@@ -426,7 +425,7 @@ PlayTrunkAnim = function()
     SetEntityInvincible(myPed, true)
     ClearPedTasksImmediately(myPed)
     RequestAnimDict2("amb@world_human_sunbathe@female@back@base")
-    TaskPlayAnim(myPed, "amb@world_human_sunbathe@female@back@base", "base", 8.0, -8.0, -1, 1, 0.0, false, false, false)
+    TaskPlayAnim(myPed, "amb@world_human_sunbathe@female@back@base", "base", 8.0, -8.0, -1, 1, 0.0, true, true, true)
 end
 
 local inTrunkThread = false
@@ -535,7 +534,7 @@ if Config.DevMode then
 
         SetupCameraTrunk(myPed, vehicle)
         RequestAnimDict2("amb@world_human_sunbathe@female@back@base")
-        TaskPlayAnim(myPed, "amb@world_human_sunbathe@female@back@base", "base", 8.0, -8.0, -1, 1, 0.0, false, false, false)
+        TaskPlayAnim(myPed, "amb@world_human_sunbathe@female@back@base", "base", 8.0, -8.0, -1, 1, 0.0, true, true, true)
 
         local minDims, maxDims = GetModelDimensions(GetEntityModel(vehicle))
 
@@ -649,7 +648,7 @@ if Config.DevMode then
 
             if changed then
                 AttachEntityToEntity(myPed, vehicle, 0, ox, oy, oz, rx, ry, rz, true, true, false, true, 1, true)
-                TaskPlayAnim(myPed, "amb@world_human_sunbathe@female@back@base", "base", 8.0, -8.0, -1, 1, 0.0, false, false, false)
+                TaskPlayAnim(myPed, "amb@world_human_sunbathe@female@back@base", "base", 8.0, -8.0, -1, 1, 0.0, true, true, true)
             end
 
             Citizen.Wait(0)
