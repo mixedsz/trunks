@@ -1,0 +1,18 @@
+Locales["en"] = {
+    ["enterVehicle"] = "Enter trunk",
+    ["exitVehicle"] = "Exit trunk",
+    ["getIntoTrunk"] = "Getting into trunk",
+    ["getOutOfTrunk"] = "Getting out of trunk",
+    ["vehicleIsLocked"] = "Vehicle is locked",
+    ["vehicleIsTooFast"] = "Vehicle is moving too fast",
+    ["putPlayerInTrunk"] = "Put into trunk",
+    ["puttingPlayerIntoTrunk"] = "Putting into trunk",
+    ["pullPlayerFromTrunk"] = "Take out from trunk",
+    ["pullingPlayerOutOfTrunk"] = "Taking out from trunk",
+    ["cantPutPlayerIntoThatVehicle"] = "You can't put player into that vehicle",
+    ["position"] = "Position",
+    ["rotation"] = "Rotation",
+    ["confirm"] = "Accept",
+    ["cancel"] = "Cancel",
+    ["openAllVehicleDoors"] = "Open all doors",
+}
