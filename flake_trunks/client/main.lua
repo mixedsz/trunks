@@ -418,7 +418,10 @@ PlayTrunkAnim = function()
     local myPed = PlayerPedId()
     SetPedCanRagdoll(myPed, false)
     SetEntityInvincible(myPed, true)
-    ClearPedTasks(myPed)
+    -- Do NOT call ClearPedTasks here: clearing tasks resets the ped to its
+    -- natural world position for one frame before the new anim takes hold,
+    -- causing the visible up/down jitter when wasabi's loop fights us.
+    -- TaskPlayAnim overrides the active task directly with no intermediate clear.
     RequestAnimDict2("fin_ext_p1-7")
     -- flag 2 = hold on last frame; 999.0 speed snaps to the lying-flat end frame instantly
     TaskPlayAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 8.0, 8.0, -1, 2, 999.0, false, false, false)
@@ -443,7 +446,6 @@ AddStateBagChangeHandler("InTrunk", ("player:%s"):format(MyServerId), function(b
                     FreezeEntityPosition(myPed, true)
                     if not IsEntityPlayingAnim(myPed, "fin_ext_p1-7", "cs_devin_dual-7", 3) then
                         PlayTrunkAnim()
-                        Citizen.Wait(50)
                     end
 
                     DisableAllControlActions2()
