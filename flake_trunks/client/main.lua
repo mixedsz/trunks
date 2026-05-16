@@ -239,11 +239,13 @@ SetStateInTrunk = function(vehicleNetId, inTrunk, vehicle)
     if inTrunk then
         local offset = Offsets[GetEntityModel(vehicle)]
         if not offset then
-            local minDims, maxDims = GetModelDimensions(GetEntityModel(vehicle))
-            offset = {
-                o = { x = 0.0, y = minDims.y * 0.80, z = 0.25 },
-                r = { x = 0.0, y = 0.0, z = 0.0 },
-            }
+            local cls = GetVehicleClass(vehicle)
+            local fb  = Config.ClassFallbackOffsets[cls]
+            if fb then
+                offset = { o = { x = fb.x, y = fb.y, z = fb.z }, r = { x = 0.0, y = 0.0, z = fb.rz } }
+            else
+                offset = { o = { x = 0.0, y = -2.85, z = 0.25 }, r = { x = 0.0, y = 0.0, z = 180.0 } }
+            end
         end
         SetPedProofInTrunk(myPed, true)
         SetPedCanRagdoll(myPed, false)

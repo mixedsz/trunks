@@ -58,5 +58,27 @@ Config = {
     EnabledKeysWhileInTrunk = {
         249, -- N - INPUT_PUSH_TO_TALK
         245, -- T - INPUT_MP_TEXT_CHAT_ALL
+    },
+
+    -- Fallback offsets keyed by GetVehicleClass() result.
+    -- Used when a vehicle has no entry in server/offsets.lua.
+    -- rz = 180.0 faces the ped toward the rear so the head stays inside the trunk.
+    ClassFallbackOffsets = {
+        [0]  = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Compacts
+        [1]  = { x = 0.0, y = -2.95, z = 0.25, rz = 180.0 }, -- Sedans
+        [2]  = { x = 0.0, y = -3.5,  z = 0.25, rz = 180.0 }, -- SUVs
+        [3]  = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Coupes
+        [4]  = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Muscle
+        [5]  = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Sports Classics
+        [6]  = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Sports
+        [7]  = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Super
+        [9]  = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Off-road
+        [10] = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Industrial
+        [11] = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Utility
+        [12] = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Vans
+        [17] = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Service
+        [18] = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Emergency
+        [19] = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Military
+        [20] = { x = 0.0, y = -2.85, z = 0.25, rz = 180.0 }, -- Commercial
     }
 }
